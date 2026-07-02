@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abyss Realms — Descend Into Power</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root {
+    --abyss-black: #050208;
+    --abyss-dark: #0a0612;
+    --abyss-deep: #120820;
+    --cosmic-purple: #6b2c91;
+    --cosmic-violet: #a855f7;
+    --abyss-red: #c41e3a;
+    --abyss-crimson: #ff2d55;
+    --gold: #d4af37;
+    --gold-light: #f4d03f;
+    --soft-white: #e8e6f0;
+    --muted: #8a849e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--abyss-black);
+    color: var(--soft-white);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+  .font-display { font-family: 'Cinzel', serif; }
+
+  #stars-canvas {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -2; pointer-events: none;
+  }
+  .nebula-bg {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 20%, rgba(107,44,145,0.25), transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 60%, rgba(196,30,58,0.18), transparent 60%),
+      radial-gradient(ellipse 100% 100% at 50% 100%, rgba(168,85,247,0.1), transparent 70%),
+      var(--abyss-black);
+  }
+  .orb {
+    position: fixed; border-radius: 50%;
+    filter: blur(80px); opacity: 0.4;
+    z-index: -1; pointer-events: none;
+    animation: float 20s ease-in-out infinite;
+    transition: transform 0.4s ease-out;
+  }
+  .orb-1 { width: 500px; height: 500px; background: var(--cosmic-purple); top: -10%; left: -10%; }
+  .orb-2 { width: 600px; height: 600px; background: var(--abyss-red); bottom: -15%; right: -10%; animation-delay: -10s; }
+  .orb-3 { width: 400px; height: 400px; background: var(--cosmic-violet); top: 40%; left: 50%; animation-delay: -5s; }
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(50px, -30px) scale(1.1); }
+    66% { transform: translate(-30px, 40px) scale(0.95); }
+  }
+
+  .glass {
+    background: rgba(18, 8, 32, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 20px;
+  }
+  .glass-hover { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  .glass-hover:hover {
+    border-color: rgba(212, 175, 55, 0.5);
+    transform: translateY(-5px);
+    box-shadow: 0 20px 50px rgba(168, 85, 247, 0.15), 0 0 30px rgba(212, 175, 55, 0.1);
+  }
+
+  .gold-text {
+    background: linear-gradient(135deg, #f4d03f 0%, #d4af37 50%, #b8941f 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .cosmic-text {
+    background: linear-gradient(135deg, #a855f7 0%, #ff2d55 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .aurora {
+    background: linear-gradient(90deg, #a855f7, #ff2d55, #d4af37, #a855f7);
+    background-size: 300% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: aurora 6s linear infinite;
+  }
+  @keyframes aurora {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+
+  .btn-primary {
+    position: relative;
+    background: linear-gradient(135deg, var(--cosmic-purple), var(--abyss-red));
+    color: white; padding: 14px 32px;
+    border-radius: 50px; font-weight: 600;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.1);
+    display: inline-block;
+  }
+  .btn-primary::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--abyss-red), var(--cosmic-violet));
+    opacity: 0; transition: opacity 0.3s ease;
+  }
+  .btn-primary:hover::before { opacity: 1; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 15px 40px rgba(196, 30, 58, 0.4); }
+  .btn-primary span { position: relative; z-index: 1; }
+
+  .btn-secondary {
+    background: transparent; color: var(--soft-white);
+    padding: 14px 32px; border-radius: 50px;
+    font-weight: 500; border: 1px solid rgba(212, 175, 55, 0.4);
+    transition: all 0.3s ease; display: inline-block;
+  }
+  .btn-secondary:hover {
+    border-color: var(--gold);
+    background: rgba(212, 175, 55, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .nav-link {
+    position: relative; color: var(--soft-white);
+    opacity: 0.7; transition: all 0.3s ease;
+  }
+  .nav-link::after {
+    content: ''; position: absolute;
+    bottom: -4px; left: 50%;
+    width: 0; height: 1px; background: var(--gold);
+    transition: all 0.3s ease; transform: translateX(-50%);
+  }
+  .nav-link:hover { opacity: 1; color: var(--gold); }
+  .nav-link:hover::after { width: 100%; }
+
+  .reveal {
+    opacity: 0; transform: translateY(40px);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  .logo-glow {
+    filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.5)) drop-shadow(0 0 60px rgba(196, 30, 58, 0.3));
+    animation: pulse-glow 4s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.5)) drop-shadow(0 0 60px rgba(196, 30, 58, 0.3)); }
+    50% { filter: drop-shadow(0 0 50px rgba(168, 85, 247, 0.7)) drop-shadow(0 0 90px rgba(196, 30, 58, 0.5)); }
+  }
+  .float-anim { animation: floating 6s ease-in-out infinite; }
+  @keyframes floating {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  .section-title { font-family: 'Cinzel', serif; font-weight: 800; letter-spacing: 0.05em; }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--abyss-black); }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--cosmic-purple), var(--abyss-red)); border-radius: 4px; }
+
+  .key-card {
+    background: rgba(18, 8, 32, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    transition: all 0.3s ease;
+  }
+  .key-card:hover {
+    border-color: var(--gold);
+    background: rgba(18, 8, 32, 0.7);
+    transform: scale(1.02);
+  }
+  .key-cap {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(196, 30, 58, 0.2));
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-family: 'Cinzel', serif; font-weight: 600;
+    color: var(--gold-light);
+    box-shadow: 0 4px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+    min-width: 70px; text-align: center; display: inline-block;
+    font-size: 13px;
+  }
+
+  .gallery-item {
+    position: relative; overflow: hidden;
+    border-radius: 20px;
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    transition: all 0.4s ease;
+  }
+  .gallery-item img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .gallery-item:hover img { transform: scale(1.08); }
+  .gallery-item:hover { border-color: rgba(212, 175, 55, 0.5); box-shadow: 0 20px 60px rgba(168, 85, 247, 0.2); }
+  .gallery-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(5, 2, 8, 0.9) 0%, transparent 60%);
+    display: flex; align-items: flex-end;
+    padding: 24px; opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .gallery-item:hover .gallery-overlay { opacity: 1; }
+
+  .social-card {
+    background: rgba(18, 8, 32, 0.4);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative; overflow: hidden;
+  }
+  .social-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--cosmic-purple), var(--abyss-red));
+    opacity: 0; transition: opacity 0.4s ease; z-index: 0;
+  }
+  .social-card:hover::before { opacity: 0.15; }
+  .social-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--gold);
+    box-shadow: 0 20px 50px rgba(168, 85, 247, 0.25);
+  }
+  .social-card > * { position: relative; z-index: 1; }
+
+  .mobile-menu {
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .mobile-menu.open { transform: translateX(0); }
+
+  .hero-title {
+    font-family: 'Cinzel', serif; font-weight: 900;
+    letter-spacing: 0.08em; line-height: 1;
+  }
+
+  .tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 16px;
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 50px; font-size: 12px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold-light);
+  }
+  .tag-dot {
+    width: 6px; height: 6px;
+    background: var(--abyss-crimson);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--abyss-crimson);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+
+  .feature-card { position: relative; overflow: hidden; }
+  .feature-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    transform: translateX(-100%); transition: transform 0.6s ease;
+  }
+  .feature-card:hover::before { transform: translateX(100%); }
+
+  .marquee {
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, white 10%, white 90%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, white 10%, white 90%, transparent);
+  }
+  .marquee-track {
+    display: flex; gap: 4rem;
+    animation: scroll-x 30s linear infinite;
+    white-space: nowrap;
+  }
+  @keyframes scroll-x {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+</style>
+</head>
+<body>
+
+<div class="nebula-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<canvas id="stars-canvas"></canvas>
+
+<!-- Navbar -->
+<nav class="fixed top-0 left-0 w-full z-50 px-6 lg:px-12 py-5">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <a href="#home" class="flex items-center gap-3">
+      <img src="https://z-cdn-media.chatglm.cn/files/b767a893-6d0c-4f2f-a7c2-15f808427811.png?auth_key=1882863791-a8fdb3acc5094693a29733e62159fe03-0-d39c3d302a806e313035c035924ed1ca" alt="Abyss Realms" class="h-12 w-auto">
+    </a>
+    <div class="hidden lg:flex items-center gap-10">
+      <a href="#home" class="nav-link text-sm tracking-wider uppercase">Home</a>
+      <a href="#about" class="nav-link text-sm tracking-wider uppercase">About</a>
+      <a href="#features" class="nav-link text-sm tracking-wider uppercase">Features</a>
+      <a href="#controls" class="nav-link text-sm tracking-wider uppercase">Controls</a>
+      <a href="#gallery" class="nav-link text-sm tracking-wider uppercase">Gallery</a>
+      <a href="#community" class="nav-link text-sm tracking-wider uppercase">Community</a>
+    </div>
+    <div class="hidden lg:block">
+      <a href="https://discord.gg/ASvxZd7eD" target="_blank" class="btn-primary text-sm"><span><i class="fab fa-discord mr-2"></i>Play Now</span></a>
+    </div>
+    <button id="menuBtn" class="lg:hidden text-2xl text-white"><i class="fas fa-bars"></i></button>
+  </div>
+</nav>
+
+<!-- Mobile menu -->
+<div id="mobileMenu" class="mobile-menu fixed top-0 right-0 w-80 h-full bg-[#120820] z-50 p-8 lg:hidden border-l border-[rgba(212,175,55,0.2)]">
+  <div class="flex justify-between items-center mb-10">
+    <span class="font-display gold-text text-xl">Menu</span>
+    <button id="closeMenu" class="text-2xl"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="flex flex-col gap-6">
+    <a href="#home" class="nav-link text-sm uppercase tracking-wider">Home</a>
+    <a href="#about" class="nav-link text-sm uppercase tracking-wider">About</a>
+    <a href="#features" class="nav-link text-sm uppercase tracking-wider">Features</a>
+    <a href="#controls" class="nav-link text-sm uppercase tracking-wider">Controls</a>
+    <a href="#gallery" class="nav-link text-sm uppercase tracking-wider">Gallery</a>
+    <a href="#community" class="nav-link text-sm uppercase tracking-wider">Community</a>
+    <a href="https://discord.gg/ASvxZd7eD" target="_blank" class="btn-primary text-sm mt-4 text-center"><span><i class="fab fa-discord mr-2"></i>Play Now</span></a>
+  </div>
+</div>
+
+<!-- Hero -->
+<section id="home" class="relative min-h-screen flex items-center justify-center px-6 pt-24 pb-12">
+  <div class="max-w-7xl mx-auto text-center">
+    <div class="reveal">
+      <span class="tag mb-8 inline-flex"><span class="tag-dot"></span>Now in Development</span>
+    </div>
+    <div class="reveal flex justify-center mb-8">
+      <img src="https://z-cdn-media.chatglm.cn/files/b767a893-6d0c-4f2f-a7c2-15f808427811.png?auth_key=1882863791-a8fdb3acc5094693a29733e62159fe03-0-d39c3d302a806e313035c035924ed1ca" alt="Abyss Realms Logo" class="h-48 md:h-64 w-auto logo-glow float-anim">
+    </div>
+    <h1 class="hero-title text-5xl md:text-7xl lg:text-8xl mb-6 reveal">
+      <span class="block">Descend Into</span>
+      <span class="aurora">The Abyss</span>
+    </h1>
+    <p class="text-lg md:text-xl text-[var(--muted)] max-w-2xl mx-auto mb-10 reveal">
+      A dark fantasy combat experience forged in the depths. Master ancient techniques, harness abyssal powers, and carve your name into the void.
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-4 reveal">
+      <a href="https://discord.gg/ASvxZd7eD" target="_blank" class="btn-primary"><span><i class="fab fa-discord mr-2"></i>Join the Abyss</span></a>
+      <a href="#about" class="btn-secondary"><i class="fas fa-play mr-2"></i>Discover More</a>
+    </div>
+
+    <div class="grid grid-cols-3 gap-6 max-w-2xl mx-auto mt-20 reveal">
+      <div>
+        <div class="font-display text-3xl md:text-4xl gold-text font-bold">∞</div>
+        <div class="text-xs uppercase tracking-widest text-[var(--muted)] mt-1">Combat Combos</div>
+      </div>
+      <div>
+        <div class="font-display text-3xl md:text-4xl gold-text font-bold">9+</div>
+        <div class="text-xs uppercase tracking-widest text-[var(--muted)] mt-1">Unique Abilities</div>
+      </div>
+      <div>
+        <div class="font-display text-3xl md:text-4xl gold-text font-bold">1</div>
+        <div class="text-xs uppercase tracking-widest text-[var(--muted)] mt-1">Abyss Awaits</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[var(--muted)] animate-bounce">
+    <span class="text-xs uppercase tracking-widest">Scroll</span>
+    <i class="fas fa-chevron-down"></i>
+  </div>
+</section>
+
+<!-- Marquee -->
+<div class="marquee py-6 border-y border-[rgba(212,175,55,0.1)]">
+  <div class="marquee-track text-3xl md:text-5xl font-display font-bold">
+    <span class="cosmic-text">ABYSS REALMS</span>
+    <span class="text-[var(--muted)] opacity-30">✦</span>
+    <span class="gold-text">DESCEND</span>
+    <span class="text-[var(--muted)] opacity-30">✦</span>
+    <span class="cosmic-text">CONQUER</span>
+    <span class="text-[var(--muted)] opacity-30">✦</span>
+    <span class="gold-text">SURVIVE</span>
+    <span class="text-[var(--muted)] opacity-30">✦</span>
+    <span class="cosmic-text">ABYSS REALMS</span>
+    <span class="text-[var(--muted)] opacity-30">✦</span>
+    <span class="gold-text">DESCEND</span>
+    <span class="text-[var(--muted)] opacity-30">✦</span>
+    <span class="cosmic-text">CONQUER</span>
+    <span class="text-[var(--muted)] opacity-30">✦</span>
+    <span class="gold-text">SURVIVE</span>
+    <span class="text-[var(--muted)] opacity-30">✦</span>
+  </div>
+</div>
+
+<!-- About -->
+<section id="about" class="relative py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div class="reveal">
+        <span class="tag mb-6 inline-flex"><span class="tag-dot"></span>The Realm</span>
+        <h2 class="section-title text-4xl md:text-6xl mb-6">
+          Where <span class="cosmic-text">Shadows</span> <br>Become Power
+        </h2>
+        <p class="text-[var(--muted)] mb-6 leading-relaxed">
+          Abyss Realms is a dark fantasy combat experience built on Roblox that pushes the boundaries of skill-based gameplay. Every swing, every dash, every parry matters in a world where the abyss watches your every move.
+        </p>
+        <p class="text-[var(--muted)] mb-8 leading-relaxed">
+          Master fluid combos, harness devastating abilities, and prove your worth against other warriors in intense skill-driven battles. The abyss does not forgive — it rewards the bold.
+        </p>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="glass p-4 glass-hover">
+            <i class="fas fa-bolt text-2xl gold-text mb-2"></i>
+            <div class="font-semibold">Skill-Based Combat</div>
+            <div class="text-xs text-[var(--muted)]">Precision over power</div>
+          </div>
+          <div class="glass p-4 glass-hover">
+            <i class="fas fa-fire text-2xl cosmic-text mb-2"></i>
+            <div class="font-semibold">Abyssal Powers</div>
+            <div class="text-xs text-[var(--muted)]">Master the void</div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal relative">
+        <div class="glass p-3 rounded-3xl overflow-hidden">
+          <img src="https://z-cdn-media.chatglm.cn/files/d688f4b2-babe-4e54-a7cf-4be13d165da1.jpg?auth_key=1882863791-95b180de1d4e43f6bb6bc07e51dee6c7-0-1842a373c2fc113bb6d398158c71128d" alt="Abyss Character" class="rounded-2xl w-full">
+        </div>
+        <div class="absolute -bottom-6 -left-6 glass p-4 hidden md:block">
+          <div class="text-3xl font-display gold-text font-bold">2026</div>
+          <div class="text-xs text-[var(--muted)] uppercase tracking-wider">Coming Soon</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Features -->
+<section id="features" class="relative py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <span class="tag mb-6 inline-flex"><span class="tag-dot"></span>Features</span>
+      <h2 class="section-title text-4xl md:text-6xl mb-4">
+        Forged In <span class="aurora">Darkness</span>
+      </h2>
+      <p class="text-[var(--muted)] max-w-2xl mx-auto">
+        Every mechanic crafted to deliver a visceral, skill-defining combat experience unlike anything else on the platform.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="glass feature-card glass-hover p-8 reveal">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#6b2c91] to-[#c41e3a] flex items-center justify-center mb-6">
+          <i class="fas fa-khanda text-2xl text-white"></i>
+        </div>
+        <h3 class="font-display text-xl mb-3 gold-text">Deep Combat</h3>
+        <p class="text-[var(--muted)] text-sm">Light swings, slams, blocks, and parries weave into infinite combos. Read your opponent, punish mistakes.</p>
+      </div>
+      <div class="glass feature-card glass-hover p-8 reveal">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#6b2c91] to-[#c41e3a] flex items-center justify-center mb-6">
+          <i class="fas fa-wind text-2xl text-white"></i>
+        </div>
+        <h3 class="font-display text-xl mb-3 gold-text">Abyssal Abilities</h3>
+        <p class="text-[var(--muted)] text-sm">Wind Gusts, Flickering Swords, and the Abysmal Dark Hole — each ability a tool of devastation.</p>
+      </div>
+      <div class="glass feature-card glass-hover p-8 reveal">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#6b2c91] to-[#c41e3a] flex items-center justify-center mb-6">
+          <i class="fas fa-shield-halved text-2xl text-white"></i>
+        </div>
+        <h3 class="font-display text-xl mb-3 gold-text">Timing Parry</h3>
+        <p class="text-[var(--muted)] text-sm">Master the perfect parry window to turn the tide. Skill, not luck, decides the victor.</p>
+      </div>
+      <div class="glass feature-card glass-hover p-8 reveal">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#6b2c91] to-[#c41e3a] flex items-center justify-center mb-6">
+          <i class="fas fa-person-running text-2xl text-white"></i>
+        </div>
+        <h3 class="font-display text-xl mb-3 gold-text">Momentum Dash</h3>
+        <p class="text-[var(--muted)] text-sm">Directional dashing with Q + WASD creates fluid movement. Position is everything in the abyss.</p>
+      </div>
+      <div class="glass feature-card glass-hover p-8 reveal">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#6b2c91] to-[#c41e3a] flex items-center justify-center mb-6">
+          <i class="fas fa-eye text-2xl text-white"></i>
+        </div>
+        <h3 class="font-display text-xl mb-3 gold-text">Visceral Atmosphere</h3>
+        <p class="text-[var(--muted)] text-sm">Cinematic lighting, abyssal effects, and a moody soundscape draw you into the void.</p>
+      </div>
+      <div class="glass feature-card glass-hover p-8 reveal">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#6b2c91] to-[#c41e3a] flex items-center justify-center mb-6">
+          <i class="fas fa-trophy text-2xl text-white"></i>
+        </div>
+        <h3 class="font-display text-xl mb-3 gold-text">Endless Mastery</h3>
+        <p class="text-[var(--muted)] text-sm">No ceiling. Only you and the depths. Become legend — or be forgotten in the dark.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Controls -->
+<section id="controls" class="relative py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <span class="tag mb-6 inline-flex"><span class="tag-dot"></span>Combat Manual</span>
+      <h2 class="section-title text-4xl md:text-6xl mb-4">
+        Master The <span class="cosmic-text">Controls</span>
+      </h2>
+      <p class="text-[var(--muted)] max-w-2xl mx-auto">
+        Every key is a weapon. Every input, a decision. Learn the language of the abyss.
+      </p>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div class="space-y-3 reveal">
+        <div class="key-card p-4 flex items-center justify-between">
+          <span class="key-cap">M1</span>
+          <div class="text-right">
+            <div class="font-semibold">Light Swing</div>
+            <div class="text-xs text-[var(--muted)]">Quick offensive strike</div>
+          </div>
+        </div>
+        <div class="key-card p-4 flex items-center justify-between">
+          <span class="key-cap">M1 + Space</span>
+          <div class="text-right">
+            <div class="font-semibold">Slam</div>
+            <div class="text-xs text-[var(--muted)]">Devastating downward blow</div>
+          </div>
+        </div>
+        <div class="key-card p-4 flex items-center justify-between">
+          <span class="key-cap">Z</span>
+          <div class="text-right">
+            <div class="font-semibold">Wind Gust</div>
+            <div class="text-xs text-[var(--muted)]">Push enemies back</div>
+          </div>
+        </div>
+        <div class="key-card p-4 flex items-center justify-between">
+          <span class="key-cap">X</span>
+          <div class="text-right">
+            <div class="font-semibold">Flickering Sword</div>
+            <div class="text-xs text-[var(--muted)]">Rapid ethereal slashes</div>
+          </div>
+        </div>
+        <div class="key-card p-4 flex items-center justify-between">
+          <span class="key-cap">C</span>
+          <div class="text-right">
+            <div class="font-semibold">Abysmal Dark Hole</div>
+            <div class="text-xs text-[var(--muted)]">Devour all in range</div>
+          </div>
+        </div>
+        <div class="key-card p-4 flex items-center justify-between">
+          <span class="key-cap">F</span>
+          <div class="text-right">
+            <div class="font-semibold">Block</div>
+            <div class="text-xs text-[var(--muted)]">Defensive stance</div>
+          </div>
+        </div>
+        <div class="key-card p-4 flex items-center justify-between">
+          <span class="key-cap">Q + WASD</span>
+          <div class="text-right">
+            <div class="font-semibold">Momentum Dash</div>
+            <div class="text-xs text-[var(--muted)]">Directional evasion</div>
+          </div>
+        </div>
+        <div class="key-card p-4 flex items-center justify-between">
+          <span class="key-cap">W + W</span>
+          <div class="text-right">
+            <div class="font-semibold">Sprint</div>
+            <div class="text-xs text-[var(--muted)]">Burst of speed</div>
+          </div>
+        </div>
+        <div class="key-card p-4 flex items-center justify-between">
+          <span class="key-cap">F + Timing</span>
+          <div class="text-right">
+            <div class="font-semibold">Parry</div>
+            <div class="text-xs text-[var(--muted)]">Perfect defense, deadly counter</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <div class="glass p-3 rounded-3xl">
+          <img src="https://z-cdn-media.chatglm.cn/files/7c62d9fb-d995-4141-8e8d-3e102b013878.jpg?auth_key=1882863791-c3e3a04ab3b44cf6978fd629d8335eb4-0-983971430988c084ec87e7ab85ff6a25" alt="Abyss Realms Controls" class="rounded-2xl w-full">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Gallery -->
+<section id="gallery" class="relative py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <span class="tag mb-6 inline-flex"><span class="tag-dot"></span>Visions</span>
+      <h2 class="section-title text-4xl md:text-6xl mb-4">
+        Glimpses Of <span class="aurora">The Abyss</span>
+      </h2>
+      <p class="text-[var(--muted)] max-w-2xl mx-auto">
+        Fragments captured from the depths. Witness what awaits.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="gallery-item reveal aspect-[4/3]">
+        <img src="https://z-cdn-media.chatglm.cn/files/d688f4b2-babe-4e54-a7cf-4be13d165da1.jpg?auth_key=1882863791-95b180de1d4e43f6bb6bc07e51dee6c7-0-1842a373c2fc113bb6d398158c71128d" alt="Abyss Character">
+        <div class="gallery-overlay">
+          <div>
+            <div class="text-xs uppercase tracking-widest text-[#f4d03f] mb-1">Warrior</div>
+            <div class="font-display text-xl">The Abyssal Fighter</div>
+          </div>
+        </div>
+      </div>
+      <div class="gallery-item reveal aspect-[4/3]">
+        <img src="https://z-cdn-media.chatglm.cn/files/75ea6495-a8c5-4c5f-ac6b-4895f31c5748.jpg?auth_key=1882863791-e5e7e9ae32654f3da2c8e7ccc97b7d4f-0-95fc74eb055c281bd82b164f66674ba8" alt="Abyss Power">
+        <div class="gallery-overlay">
+          <div>
+            <div class="text-xs uppercase tracking-widest text-[#f4d03f] mb-1">Power</div>
+            <div class="font-display text-xl">The Void Awakens</div>
+          </div>
+        </div>
+      </div>
+      <div class="gallery-item reveal aspect-[4/3] md:col-span-2">
+        <img src="https://z-cdn-media.chatglm.cn/files/7c62d9fb-d995-4141-8e8d-3e102b013878.jpg?auth_key=1882863791-c3e3a04ab3b44cf6978fd629d8335eb4-0-983971430988c084ec87e7ab85ff6a25" alt="Abyss Controls">
+        <div class="gallery-overlay">
+          <div>
+            <div class="text-xs uppercase tracking-widest text-[#f4d03f] mb-1">Manual</div>
+            <div class="font-display text-xl">The Path To Mastery</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Community / Socials -->
+<section id="community" class="relative py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <span class="tag mb-6 inline-flex"><span class="tag-dot"></span>Join The Legion</span>
+      <h2 class="section-title text-4xl md:text-6xl mb-4">
+        Enter The <span class="cosmic-text">Abyss</span>
+      </h2>
+      <p class="text-[var(--muted)] max-w-2xl mx-auto">
+        The depths are louder together. Connect with the community, get exclusive leaks, and prepare for descent.
+      </p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <a href="https://discord.gg/ASvxZd7eD" target="_blank" class="social-card p-8 rounded-2xl text-center reveal">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-[#5865F2] to-[#404EED] flex items-center justify-center mb-4">
+          <i class="fab fa-discord text-3xl text-white"></i>
+        </div>
+        <h3 class="font-display text-xl mb-2">Discord</h3>
+        <p class="text-xs text-[var(--muted)] mb-4">Join the official server</p>
+        <span class="text-sm gold-text font-semibold">Connect <i class="fas fa-arrow-right ml-1"></i></span>
+      </a>
+      <a href="https://www.instagram.com/abyssrealms?igsh=MTJrMXVoZnBlazJtcQ==" target="_blank" class="social-card p-8 rounded-2xl text-center reveal">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-[#E1306C] via-[#F77737] to-[#FCAF45] flex items-center justify-center mb-4">
+          <i class="fab fa-instagram text-3xl text-white"></i>
+        </div>
+        <h3 class="font-display text-xl mb-2">Instagram</h3>
+        <p class="text-xs text-[var(--muted)] mb-4">Visual updates & art</p>
+        <span class="text-sm gold-text font-semibold">Follow <i class="fas fa-arrow-right ml-1"></i></span>
+      </a>
+      <a href="https://youtube.com/@abyssrealmofficial?si=0FAmbrBMyjThkd-X" target="_blank" class="social-card p-8 rounded-2xl text-center reveal">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-[#FF0000] to-[#CC0000] flex items-center justify-center mb-4">
+          <i class="fab fa-youtube text-3xl text-white"></i>
+        </div>
+        <h3 class="font-display text-xl mb-2">YouTube</h3>
+        <p class="text-xs text-[var(--muted)] mb-4">Trailers & gameplay</p>
+        <span class="text-sm gold-text font-semibold">Subscribe <i class="fas fa-arrow-right ml-1"></i></span>
+      </a>
+      <a href="https://x.com/AbyssRealmsrbx" target="_blank" class="social-card p-8 rounded-2xl text-center reveal">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-[#1DA1F2] to-[#0c8ce9] flex items-center justify-center mb-4">
+          <i class="fab fa-x-twitter text-3xl text-white"></i>
+        </div>
+        <h3 class="font-display text-xl mb-2">X / Twitter</h3>
+        <p class="text-xs text-[var(--muted)] mb-4">Real-time announcements</p>
+        <span class="text-sm gold-text font-semibold">Follow <i class="fas fa-arrow-right ml-1"></i></span>
+      </a>
+    </div>
+
+    <div class="glass p-8 md:p-16 rounded-3xl text-center mt-16 reveal relative overflow-hidden">
+      <div class="absolute inset-0 opacity-30">
+        <div class="absolute top-0 left-1/4 w-64 h-64 bg-[#6b2c91] rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 right-1/4 w-64 h-64 bg-[#c41e3a] rounded-full blur-3xl"></div>
+      </div>
+      <div class="relative">
+        <h3 class="section-title text-3xl md:text-5xl mb-4">
+          The Abyss <span class="aurora">Awaits</span>
+        </h3>
+        <p class="text-[var(--muted)] max-w-xl mx-auto mb-8">
+          Be among the first to descend. Join the Discord for exclusive access, dev updates, and the company of those who hear the call of the void.
+        </p>
+        <a href="https://discord.gg/ASvxZd7eD" target="_blank" class="btn-primary text-lg"><span><i class="fab fa-discord mr-2"></i>Become Abyssbound</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="relative py-12 px-6 border-t border-[rgba(212,175,55,0.1)]">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid md:grid-cols-3 gap-8 items-center">
+      <div class="flex items-center gap-3">
+        <img src="https://z-cdn-media.chatglm.cn/files/b767a893-6d0c-4f2f-a7c2-15f808427811.png?auth_key=1882863791-a8fdb3acc5094693a29733e62159fe03-0-d39c3d302a806e313035c035924ed1ca" alt="Abyss Realms" class="h-12 w-auto">
+        <div>
+          <div class="font-display font-bold gold-text">ABYSS REALMS</div>
+          <div class="text-xs text-[var(--muted)]">by Abyss Studio</div>
+        </div>
+      </div>
+      <div class="text-center text-xs text-[var(--muted)] uppercase tracking-widest">
+        © 2026 Abyss Studio. All rights reserved.
+      </div>
+      <div class="flex items-center justify-center md:justify-end gap-4">
+        <a href="https://discord.gg/ASvxZd7eD" target="_blank" class="w-10 h-10 rounded-full glass glass-hover flex items-center justify-center text-[#f4d03f]"><i class="fab fa-discord"></i></a>
+        <a href="https://www.instagram.com/abyssrealms?igsh=MTJrMXVoZnBlazJtcQ==" target="_blank" class="w-10 h-10 rounded-full glass glass-hover flex items-center justify-center text-[#f4d03f]"><i class="fab fa-instagram"></i></a>
+        <a href="https://youtube.com/@abyssrealmofficial?si=0FAmbrBMyjThkd-X" target="_blank" class="w-10 h-10 rounded-full glass glass-hover flex items-center justify-center text-[#f4d03f]"><i class="fab fa-youtube"></i></a>
+        <a href="https://x.com/AbyssRealmsrbx" target="_blank" class="w-10 h-10 rounded-full glass glass-hover flex items-center justify-center text-[#f4d03f]"><i class="fab fa-x-twitter"></i></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Animated starfield
+  const canvas = document.getElementById('stars-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    stars = [];
+    const count = Math.floor((canvas.width * canvas.height) / 8000);
+    for (let i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.2 + 0.2,
+        opacity: Math.random() * 0.7 + 0.3,
+        speed: Math.random() * 0.05 + 0.01,
+        twinkle: Math.random() * Math.PI * 2,
+        color: Math.random() > 0.85 ? '#ff2d55' : (Math.random() > 0.7 ? '#a855f7' : '#ffffff')
+      });
+    }
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  function animateStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      s.twinkle += s.speed;
+      const alpha = s.opacity * (0.6 + Math.sin(s.twinkle) * 0.4);
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, Math.max(0.1, s.r), 0, Math.PI * 2);
+      ctx.fillStyle = s.color;
+      ctx.globalAlpha = alpha;
+      ctx.fill();
+      if (s.r > 0.9) {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, Math.max(0.1, s.r * 3), 0, Math.PI * 2);
+        ctx.fillStyle = s.color;
+        ctx.globalAlpha = alpha * 0.1;
+        ctx.fill();
+      }
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(animateStars);
+  }
+  animateStars();
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Mobile menu
+  const menuBtn = document.getElementById('menuBtn');
+  const closeMenu = document.getElementById('closeMenu');
+  const mobileMenu = document.getElementById('mobileMenu');
+  menuBtn.addEventListener('click', () => mobileMenu.classList.add('open'));
+  closeMenu.addEventListener('click', () => mobileMenu.classList.remove('open'));
+  mobileMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => mobileMenu.classList.remove('open'));
+  });
+
+  // Parallax orbs on mouse move
+  document.addEventListener('mousemove', (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 30;
+    const y = (e.clientY / window.innerHeight - 0.5) * 30;
+    document.querySelectorAll('.orb').forEach((orb, i) => {
+      const mult = i === 0 ? 1 : (i === 1 ? -1 : 0.5);
+      orb.style.transform = `translate(${x * mult}px, ${y * mult}px)`;
+    });
+  });
+</script>
+
+</body>
+</html>
